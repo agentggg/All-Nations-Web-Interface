@@ -5,16 +5,19 @@ const Home = () => {
       <h1 style={styles.title}>All Nations Web Interface</h1>
 
       <div style={styles.container}>
-        <a href="/send_all_select" style={styles.button}>
+        <a href="/send_select" style={styles.button}>
           Send by Selected Contacts
         </a>
         <a href="/send_all" style={styles.button}>
           Send To All Contacts
         </a>
-        <a href="/send-by-ambassador" style={styles.button}>
+        <a href="/send_by_ambassador" style={styles.button}>
           Send by Selected Ambassador Contacts
         </a>
-        <a href="/send-by-outreach" style={styles.button}>
+        <a href="/send_by_category" style={styles.button} >
+          Send by Selected Category
+        </a>
+        <a href="/send_by_outreach_contact" style={styles.button}>
           Send by Selected Outreach Contacts
         </a>
       </div>

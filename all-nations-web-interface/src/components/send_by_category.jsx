@@ -2,21 +2,22 @@ import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./send.css";
 import ipAddress from "./config";
-console.log("🚀 ~ ipAddress:", ipAddress)
+import ImageUploader from "../resuseableComponent/UploadImage";
+import { useNavigate } from "react-router-dom";
 
-export default function SendAll() {
+export default function SendByCategory() {
   const auth = JSON.parse(localStorage.getItem("authToken")) || {};
   const token = auth?.token || "";
   const username = auth?.username || "";
   const org = auth?.org || "";
   const [recipients, setRecipients] = useState([]);
   const [selectedRecipients, setSelectedRecipients] = useState([]);
-  const [sendToAll, setSendToAll] = useState(false);
   const [message, setMessage] = useState("Lorum Ipsum");
   const [scheduleTime, setScheduleTime] = useState("");
+  const [eachContact, setEachContact] = useState(["None"])
   // const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
-
-  const [file, setFile] = useState(null);
+  const navigate = useNavigate();
+  const [file, setFile] = useState(false);
 
   // Toast State
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
@@ -36,16 +37,22 @@ export default function SendAll() {
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
   };
 
-//   const fileData = file ? {
-//   name: file.name,
-//   type: file.type,
-//   size: file.size,
-//   lastModified: file.lastModified,
-// } : null;
+  const handleChange = async (event) => {
+      await setSelectedRecipients(event.target.value);
+      const res = await fetch(`${ipAddress}/view_recipient`, {
+      method: "POST",        
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ org:org, username:username, "groupType":"categories_contacts", contactType:[event.target.value] }),
+      }
+    );
+      if (!res.ok) throw new Error("Failed to fetch contacts");
+      const data = await res.json();
+      setEachContact(data)
+  }; 
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch(`${ipAddress}/contacts_contacts?format=json`, {
+      const response = await fetch(`${ipAddress}/categories_contacts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,8 +66,8 @@ export default function SendAll() {
       const data = await response.json();
       setRecipients(
         data.map((item) => ({
-          label: item.name || item.first_name || item.phone_number,
-          value: item.phone_number,
+          label: item.category,
+          value: item.category,
         }))
       );
     } catch (err) {
@@ -76,55 +83,32 @@ export default function SendAll() {
   };
 
 const sendMessage = async () => {
-  let endpoint = "contact_text";
-
+  let endpoint = "category_text";
   if (!message) return showToast("Please enter a message.", "warning");
   if (scheduleTime && !validateDateTime(scheduleTime))
     return showToast("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM", "danger");
   if (scheduleTime) endpoint = "scheduled_messages";
 
-  // Recipients
-  const recipientsToSend =
-    sendToAll || selectedRecipients.length === 0
-      ? ["All"]
-      : selectedRecipients;
-
   // ---- If there's a file, use FormData ----
   let body;
   let headers;
+  // ---- Otherwise, send JSON ----
+  const apiData = {
+    username,
+    org,
+    message,
+    scheduledDateTime: scheduleTime,
+    selectOption: "contacts_contacts",
+    contactSelection: { contact: [selectedRecipients] },
+    file: file
+  };
 
-  if (file) {
-    const formData = new FormData();
-    formData.append("file", file); // attach the file
-
-    formData.append("username", username);
-    formData.append("org", org);
-    formData.append("message", message);
-    formData.append("scheduledDateTime", scheduleTime);
-    formData.append("selectOption", "contacts_contacts");
-
-    // 👇 same format as RN: { contact: ["All"] }
-    formData.append("contactSelection", JSON.stringify({ contact: recipientsToSend }));
-
-    body = formData;
-    headers = { Authorization: `token ${token}` }; // no Content-Type
-  } else {
-    // ---- Otherwise, send JSON ----
-    const apiData = {
-      username,
-      org,
-      message,
-      scheduledDateTime: scheduleTime,
-      selectOption: "contacts_contacts",
-      contactSelection: { contact: recipientsToSend },
-    };
-
-    body = JSON.stringify(apiData);
-    headers = {
-      "Content-Type": "application/json",
-      Authorization: `token ${token}`,
-    };
-  }
+  body = JSON.stringify(apiData);
+  headers = {
+    "Content-Type": "application/json",
+    Authorization: `token ${token}`,
+  };
+  
 
   try {
     const response = await fetch(`${ipAddress}/${endpoint}`, {
@@ -136,12 +120,8 @@ const sendMessage = async () => {
     if (!response.ok) throw new Error("Failed to send message");
     showToast("Message sent successfully!", "success");
 
-    setSendToAll(false);
-    setSelectedRecipients([]);
-    setMessage("");
-    setScheduleTime("");
-    setFile(null);
-  } catch (err) {
+    navigate(-1)  } 
+catch (err) {
     console.error(err);
     showToast("Message failed to send.", "danger");
   }
@@ -171,7 +151,7 @@ const sendMessage = async () => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="text-warning">Send Message To All Contacts</h2>
-          <button className="btn btn-outline-light btn-sm" onClick={logout}>
+          <button className="btn btn-outline-light btn-sm btn-danger" onClick={logout}>
             Logout
           </button>
         </div>
@@ -180,7 +160,18 @@ const sendMessage = async () => {
         <div className="mb-3">
           <label className="form-label">All Nation Web Interface</label>
         </div>
-
+          <div>
+      <label htmlFor="dynamic-select">Select an option:</label>
+      <select id="dynamic-select" value={selectedRecipients} onChange={handleChange}>
+        <option value="">--Please choose an option--</option> {/* Optional default option */}
+        {recipients.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {selectedRecipients && <p>You selected: {selectedRecipients}</p>}
+    </div>
         {/* Message Box */}
         <div className="mb-3">
           <label className="form-label">Message:</label>
@@ -195,11 +186,11 @@ const sendMessage = async () => {
 
         {/* File Upload */}
         <div className="mb-3">
-          <label className="form-label">Upload Image (optional):</label>
-          <input
-            type="file"
-            className="form-control"
-            onChange={(e) => setFile(e.target.files[0])}
+          <label className="form-label text-warning fw-bold">Attach Images (optional):</label>
+          <ImageUploader
+            onUploadComplete={(url) => {
+              setFile(url);
+            }}
           />
         </div>
 
@@ -225,17 +216,13 @@ const sendMessage = async () => {
         {/* Recipients Preview */}
         <div className="mt-4">
           <strong>Recipients Preview:</strong>
-          <div
-            className={`mt-2 p-2 rounded ${
-              sendToAll ? "bg-secondary text-light" : "bg-light text-dark"
-            }`}
-          > 
+          <div className="mt-2 p-2 rounded bg-secondary text-light bg-light text-dark"> 
             <div className="container text-center">
             <div className="row">
-                {recipients.map((each_contact_name, index) => (
+                {eachContact.map((each_contact_name, index) => (
                 <div className="col-12 col-md-4 mb-3" key={index}>
                     <p className="text-dark border rounded border-secondary p-2 text-center">
-                    <small>{each_contact_name["label"]}</small>
+                    <small>{each_contact_name}</small>
                     </p>
                 </div>
                 ))}
