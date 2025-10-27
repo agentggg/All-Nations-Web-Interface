@@ -1,23 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./send.css";
 import ipAddress from "./config";
 import ImageUploader from "../resuseableComponent/UploadImage";
 import { useNavigate } from "react-router-dom";
 
-export default function SendByCategory() {
+export default function SendByAmbassador() {
   const auth = JSON.parse(localStorage.getItem("authToken")) || {};
   const token = auth?.token || "";
   const username = auth?.username || "";
   const org = auth?.org || "";
+  const [recipients, setRecipients] = useState([]);
+  const [selectedRecipients, setSelectedRecipients] = useState([]);
   const [message, setMessage] = useState("");
-  // const [scheduleTime, setScheduleTime] = useState("");
-  const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const [eachContact, setEachContact] = useState(["None"])
+  // const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
   const navigate = useNavigate();
   const [file, setFile] = useState(false);
 
   // Toast State
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  useEffect(() => {
+    fetchContacts(); 
+  }, [username]); 
+
   const logout = () => {
     localStorage.removeItem("authToken");
     showToast("You have been logged out.", "info");
@@ -33,6 +41,42 @@ export default function SendByCategory() {
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
   };
 
+  const handleChange = async (event) => {
+      await setSelectedRecipients(event.target.value);
+      const res = await fetch(`${ipAddress}/view_recipient`, {
+      method: "POST",        
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ org:org, username:username, "groupType":"ambassador_contacts", contactType:[event.target.value] }),
+      }
+    );
+      if (!res.ok) throw new Error("Failed to fetch contacts");
+      const data = await res.json();
+      setEachContact(data)
+  }; 
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch(`${ipAddress}/ambassador_contacts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ org, username}),
+      });
+      if (!response.ok) throw new Error("Failed to fetch contacts");
+
+      const data = await response.json();
+      setRecipients(
+        data.map((item) => ({
+          label: item,
+          value: item,
+        }))
+      );
+    } catch (err) {
+      console.error("❌ Error loading contacts:", err);
+      showToast("Error loading contacts.", "danger");
+    }
+  };
  
   const validateDateTime = (dateTime) => {
     const regex =
@@ -41,7 +85,7 @@ export default function SendByCategory() {
   };
 
 const sendMessage = async () => {
-  let endpoint = "contact_text";
+  let endpoint = "ambassador_text";
   if (!message) return showToast("Please enter a message.", "warning");
   if (scheduleTime && !validateDateTime(scheduleTime))
     return showToast("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM", "danger");
@@ -57,7 +101,7 @@ const sendMessage = async () => {
     message,
     scheduledDateTime: scheduleTime,
     selectOption: "contacts_contacts",
-    contactSelection: { contact: ["All"] },
+    contactSelection: { contact: [selectedRecipients] },
     file: file
   };
 
@@ -88,7 +132,7 @@ catch (err) {
   return (
     <div className="container my-5">
       <button className="btn  btn-sm btn-light mb-5 align-self-end" onClick={goBack}>
-        Go Back
+        <div class="text-right">Go Back</div>
       </button>
       {/* Toast Notification */}
       {toast.show && (
@@ -111,7 +155,7 @@ catch (err) {
       <div className="card bg-dark text-light shadow-lg p-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="text-warning">Send Message To All Contacts</h2>
+          <h2 className="text-warning">Send Message To Ambassador Contacts</h2>
           <button className="btn btn-outline-light btn-sm btn-danger" onClick={logout}>
             Logout
           </button>
@@ -121,6 +165,18 @@ catch (err) {
         <div className="mb-3">
           <label className="form-label">All Nation Web Interface</label>
         </div>
+          <div>
+      <label htmlFor="dynamic-select">Select an option:</label>
+      <select id="dynamic-select" value={selectedRecipients} onChange={handleChange}>
+        <option value="">--Please choose an option--</option> {/* Optional default option */}
+        {recipients.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {selectedRecipients && <p>You selected: {selectedRecipients}</p>}
+    </div>
         {/* Message Box */}
         <div className="mb-3">
           <label className="form-label">Message:</label>
@@ -162,7 +218,23 @@ catch (err) {
           </button>
         </div>
 
-
+        {/* Recipients Preview */}
+        <div className="mt-4">
+          <strong>Recipients Preview:</strong>
+          <div className="mt-2 p-2 rounded bg-secondary text-light bg-light text-dark"> 
+            <div className="container text-center">
+            <div className="row">
+                {eachContact.map((each_contact_name, index) => (
+                <div className="col-12 col-md-4 mb-3" key={index}>
+                    <p className="text-dark border rounded border-secondary p-2 text-center">
+                    <small>{each_contact_name}</small>
+                    </p>
+                </div>
+                ))}
+            </div>
+            </div>
+          </div>
+        </div>
       </div>
         <p className="small mt-3">Version 2025.10.13.01</p>
     </div>

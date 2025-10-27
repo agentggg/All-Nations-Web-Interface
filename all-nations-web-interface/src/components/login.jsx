@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../assets/glassLogo.jpg"; // adjust path as needed
+import ipAddress from "./config";
 
 // const ipAddress = "https://allnations-agentofgod.pythonanywhere.com";
-const ipAddress = "http://localhost:8000";
 
 
 export default function Login() {

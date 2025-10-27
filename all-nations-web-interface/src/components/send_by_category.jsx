@@ -12,7 +12,7 @@ export default function SendByCategory() {
   const org = auth?.org || "";
   const [recipients, setRecipients] = useState([]);
   const [selectedRecipients, setSelectedRecipients] = useState([]);
-  const [message, setMessage] = useState("Lorum Ipsum");
+  const [message, setMessage] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
   const [eachContact, setEachContact] = useState(["None"])
   // const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
@@ -30,6 +30,10 @@ export default function SendByCategory() {
     localStorage.removeItem("authToken");
     showToast("You have been logged out.", "info");
     setTimeout(() => (window.location.href = "/login"), 1500);
+  };
+
+  const goBack = () => {
+    navigate(-1)
   };
 
   const showToast = (message, type = "success") => {
@@ -129,6 +133,9 @@ catch (err) {
 
   return (
     <div className="container my-5">
+      <button className="btn  btn-sm btn-light mb-5 align-self-end" onClick={goBack}>
+        <div class="text-right">Go Back</div>
+      </button>
       {/* Toast Notification */}
       {toast.show && (
         <div
@@ -150,7 +157,7 @@ catch (err) {
       <div className="card bg-dark text-light shadow-lg p-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="text-warning">Send Message To All Contacts</h2>
+          <h2 className="text-warning">Send Message To Category</h2>
           <button className="btn btn-outline-light btn-sm btn-danger" onClick={logout}>
             Logout
           </button>
@@ -231,7 +238,7 @@ catch (err) {
           </div>
         </div>
       </div>
-        <p className="small mt-3">Version 2025.09.02.01</p>
+        <p className="small mt-3">Version 2025.10.13.01</p>
     </div>
   );
 }
