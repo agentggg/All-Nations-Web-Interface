@@ -21,7 +21,7 @@ export default function SendByCategory() {
   const logout = () => {
     localStorage.removeItem("authToken");
     showToast("You have been logged out.", "info");
-    setTimeout(() => (window.location.href = "/login"), 1500);
+    setTimeout(() => navigate("/login"), 1500)
   };
 
   const goBack = () => {
