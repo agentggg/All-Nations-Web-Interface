@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
@@ -5,23 +6,23 @@ const Home = () => {
       <h1 style={styles.title}>All Nations Web Interface</h1>
 
       <div style={styles.container}>
-        <a to="/send_by_selected_contact" style={styles.button}>
+        <Link to="/send_by_selected_contact" style={styles.button}>
           Send by Selected Contacts
-        </a>
-        <a to="/send_all" style={styles.button}>
+        </Link>
+        <Link to="/send_all" style={styles.button}>
           Send To All Contacts
-        </a>
-        <a to="/send_by_ambassador" style={styles.button}>
+        </Link>
+        <Link to="/send_by_ambassador" style={styles.button}>
           Send by Selected Ambassador Contacts
-        </a>
-        <a to="/send_by_category" style={styles.button} >
+        </Link>
+        <Link to="/send_by_category" style={styles.button}>
           Send by Selected Category
-        </a>
-        <a to="/send_by_outreach_contact" style={styles.button}>
+        </Link>
+        <Link to="/send_by_outreach_contact" style={styles.button}>
           Send by Selected Outreach Contacts
-        </a>
+        </Link>
       </div>
-    </div> 
+    </div>
   ); 
 };
 
