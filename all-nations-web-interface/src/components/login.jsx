@@ -1,16 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../assets/glassLogo.jpg"; // adjust path as needed
 import ipAddress from "./config";
+import { useNavigate } from "react-router-dom";
 
 // const ipAddress = "https://allnations-agentofgod.pythonanywhere.com";
 
 
 export default function Login() {
-  const [username, setUsername] = useState("cisco");
-  const [password, setPassword] = useState("cisco");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [errorVisible, setErrorVisible] = useState(false);
-
+  const navigate = useNavigate();
   const handleLogin = async () => {
     setErrorVisible(false);
 
@@ -38,7 +39,7 @@ export default function Login() {
         }),
       });
 
-      window.location.href = "/"; // navigate to send page
+      navigate("/");
     } catch (err) {
       console.error("Login error:", err);
       setErrorVisible(true);

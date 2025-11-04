@@ -5,6 +5,7 @@ import Login from "./components/login";
 import SendByCategory from "./components/send_by_category";
 import SendBySelectedContacts from "./components/send_by_selected_contatc";
 import SendByAmbassador from "./components/send_by_ambassador";
+import NotFound from "./components/NotFound";
 import Home from "./components/home";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/send_by_category" element={<SendByCategory />} />
         <Route path="/send_by_ambassador" element={<SendByAmbassador />} />
         <Route path="/send_by_selected_contact" element={<SendBySelectedContacts />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
