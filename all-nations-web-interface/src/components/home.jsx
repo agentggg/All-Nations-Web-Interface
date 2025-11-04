@@ -18,7 +18,7 @@ const Home = () => {
         <Link to="/send_by_category" style={styles.button}>
           Send by Selected Category
         </Link>
-        <Link to="/send_by_outreach_contact" style={styles.button}>
+        <Link to="/NotFound" style={styles.button}>
           Send by Selected Outreach Contacts
         </Link>
       </div>
