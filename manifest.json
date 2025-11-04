@@ -1,0 +1,12 @@
+{
+  "short_name": "All Nations",
+  "name": "All Nation Web Interface",
+  "icons": [
+    { "src": "/glassLogo.png", "type": "image/png",  "sizes": "192x192" },
+    { "src": "/glassLogo.png", "type": "image/png",  "sizes": "512x512" }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
