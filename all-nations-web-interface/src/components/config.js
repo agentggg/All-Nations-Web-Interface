@@ -1,6 +1,6 @@
 
 const ipAddress = 
-'http://allnations-agentofgod.pythonanywhere.com'
+'https://allnations-agentofgod.pythonanywhere.com'
 // 'http://127.0.0.1:8000'
 
 
