@@ -1,17 +1,18 @@
 // send_by_selected_contact.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./send.css";
 import ipAddress from "./config";
 import ImageUploader from "../resuseableComponent/UploadImage";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
 
 export default function SendBySelectedContacts() {
   const auth = JSON.parse(localStorage.getItem("authToken")) || {};
   const token = auth?.token || "";
   const username = auth?.username || "";
   const org = auth?.org || "";
-
+  const { logout } = useContext(AuthContext)
   const navigate = useNavigate();
 
   // UI state
@@ -31,10 +32,10 @@ export default function SendBySelectedContacts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
+  const onLogout = () => {
+    // Use context: clears token + flips isAuthenticated=false
+    logout();
     showToast("You have been logged out.", "info");
-    setTimeout(() => navigate("/login"), 1500)
   };
 
   const goBack = () => navigate(-1);
@@ -186,7 +187,7 @@ export default function SendBySelectedContacts() {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="text-warning">Send Message To Contacts</h2>
-          <button className="btn btn-outline-light btn-sm btn-danger" onClick={logout}>
+          <button className="btn btn-outline-light btn-sm btn-danger" onClick={onLogout}>
             Logout
           </button>
         </div>

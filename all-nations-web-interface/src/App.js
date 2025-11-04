@@ -1,5 +1,7 @@
-// App.js
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "./components/AuthContext";
+
 import SendAll from "./components/send_all";
 import Login from "./components/login";
 import SendByCategory from "./components/send_by_category";
@@ -8,39 +10,72 @@ import SendByAmbassador from "./components/send_by_ambassador";
 import NotFound from "./components/NotFound";
 import Home from "./components/home";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  const { isAuthenticated } = useContext(AuthContext);
+
   const basename =
-    process.env.NODE_ENV === "production" ? "/All-Nations-Web-Interface" : "/";
-  useEffect(()=>{
-    const tokenCheck = localStorage.getItem("authToken");
-    const tokenCheckObject = JSON.parse(tokenCheck)
-    console.log(tokenCheckObject)
-    if (tokenCheckObject === null){
-      setIsAuthenticated(false)
-    }
-  })
+    process.env.NODE_ENV === "production"
+      ? "/All-Nations-Web-Interface"
+      : "/";
+
+  const PrivateRoute = ({ children }) =>
+    isAuthenticated ? children : <Navigate to="/login" replace />;
+
   return (
     <Router basename={basename}>
+      <Routes>
 
-        {isAuthenticated ? 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/send_all" element={<SendAll />} />
-          <Route path="/send_by_category" element={<SendByCategory />} />
-          <Route path="/send_by_ambassador" element={<SendByAmbassador />} />
-          <Route path="/send_by_selected_contact" element={<SendBySelectedContacts />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-            :
-          <Routes>
-            <Route path="*" element={<Login />} />
-          </Routes>
-        }
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/send_all"
+          element={
+            <PrivateRoute>
+              <SendAll />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/send_by_category"
+          element={
+            <PrivateRoute>
+              <SendByCategory />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/send_by_ambassador"
+          element={
+            <PrivateRoute>
+              <SendByAmbassador />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/send_by_selected_contact"
+          element={
+            <PrivateRoute>
+              <SendBySelectedContacts />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Router>
   );
 }
+
 export default App;

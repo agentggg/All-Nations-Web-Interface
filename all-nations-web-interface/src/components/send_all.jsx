@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./send.css";
 import ipAddress from "./config";
 import ImageUploader from "../resuseableComponent/UploadImage";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
 
 export default function SendByCategory() {
   const auth = JSON.parse(localStorage.getItem("authToken")) || {};
@@ -11,17 +12,18 @@ export default function SendByCategory() {
   const username = auth?.username || "";
   const org = auth?.org || "";
   const [message, setMessage] = useState("");
-  // const [scheduleTime, setScheduleTime] = useState("");
-  const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
+  const [scheduleTime, setScheduleTime] = useState("");
+  // const [scheduleTime, setScheduleTime] = useState("09/04/2025 11:24 AM");
   const navigate = useNavigate();
   const [file, setFile] = useState(false);
+  const { logout } = useContext(AuthContext)
 
   // Toast State
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-  const logout = () => {
-    localStorage.removeItem("authToken");
+  const onLogout = () => {
+    // Use context: clears token + flips isAuthenticated=false
+    logout();
     showToast("You have been logged out.", "info");
-    setTimeout(() => navigate("/login"), 1500)
   };
 
   const goBack = () => {
@@ -112,7 +114,7 @@ catch (err) {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="text-warning">Send Message To All Contacts</h2>
-          <button className="btn btn-outline-light btn-sm btn-danger" onClick={logout}>
+          <button className="btn btn-outline-light btn-sm btn-danger" onClick={onLogout}>
             Logout
           </button>
         </div>
