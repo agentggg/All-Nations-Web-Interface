@@ -5,7 +5,7 @@ const Home = () => {
       <h1 style={styles.title}>All Nations Web Interface</h1>
 
       <div style={styles.container}>
-        <a href="/send_select" style={styles.button}>
+        <a href="/send_by_selected_contact" style={styles.button}>
           Send by Selected Contacts
         </a>
         <a href="/send_all" style={styles.button}>
